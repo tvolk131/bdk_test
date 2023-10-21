@@ -5,10 +5,9 @@ use bdk::bitcoin::Network;
 use bdk::blockchain::{Blockchain, ElectrumBlockchain};
 use bdk::database::MemoryDatabase;
 use bdk::electrum_client::Client;
-use bdk::keys::bip39::{Language, Mnemonic, WordCount};
-use bdk::keys::{GeneratableKey, GeneratedKey};
+use bdk::keys::bip39::Mnemonic;
 use bdk::miniscript::descriptor::Wpkh;
-use bdk::miniscript::{Descriptor, Tap};
+use bdk::miniscript::Descriptor;
 use bdk::wallet::{AddressIndex, Wallet};
 use bdk::SyncOptions;
 use bitcoin::bip32::{ExtendedPrivKey, ExtendedPubKey};
@@ -16,9 +15,12 @@ use bitcoin::psbt::PartiallySignedTransaction;
 use bitcoin::secp256k1::Secp256k1;
 
 fn main() {
-    // 1. Generate a public key
-    let mnemonic: GeneratedKey<Mnemonic, Tap> =
-        Mnemonic::generate((WordCount::Words24, Language::English)).unwrap();
+    // 1. Generate a public key (we're hardcoding the mnemonic for simplicity, and so we can add some regtest funds to it)
+    let mnemonic: Mnemonic = Mnemonic::from_entropy(&[
+        64, 139, 40, 92, 18, 56, 54, 0, 79, 75, 136, 66, 199, 196, 131, 114, 222, 19, 130, 69, 12,
+        13, 67, 154, 243, 69, 186, 127, 196, 154, 207, 112,
+    ])
+    .unwrap();
     let seed = mnemonic.to_seed("");
     println!("{:?}", mnemonic.word_iter().collect::<Vec<&str>>());
     println!("{:?}", seed);
