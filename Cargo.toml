@@ -6,5 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bdk = { version = "0.29.0", features = ["keys-bip39"] }
+bdk = { git = "https://github.com/bitcoindevkit/bdk", features = ["keys-bip39"] }
+bdk_electrum = { git = "https://github.com/bitcoindevkit/bdk" }
+bdk_file_store = { git = "https://github.com/bitcoindevkit/bdk" }
 bitcoin = "0.30.1"
