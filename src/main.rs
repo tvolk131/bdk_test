@@ -8,22 +8,22 @@ use std::str::FromStr;
 use bdk::bitcoin::Network;
 use bdk::chain::PersistBackend;
 use bdk::keys::bip39::Mnemonic;
-use bdk::miniscript::descriptor::{Sh, Wpkh};
+use bdk::miniscript::descriptor::Sh;
 use bdk::miniscript::Descriptor;
 use bdk::wallet::Update;
 use bdk::{SignOptions, Wallet};
-use bdk_electrum::electrum_client::Client;
+use bdk_electrum::electrum_client::{Client, ElectrumApi};
 use bdk_electrum::ElectrumExt;
 use bdk_electrum::ElectrumUpdate;
 use bdk_file_store::Store;
 use bitcoin::bip32::{ExtendedPrivKey, ExtendedPubKey};
 use bitcoin::secp256k1::Secp256k1;
 use bitcoin::sighash::EcdsaSighashType;
-use bitcoin::PublicKey;
+use bitcoin::{PublicKey, Transaction};
 use std::io::Write;
 
 fn main() {
-    // 1. Generate a public key (we're hardcoding the mnemonic for simplicity, and so we can add some regtest funds to it)
+    // 1. Generate a public key (we're hardcoding the mnemonic for simplicity, and so we can add some testnet funds to it)
     let mnemonic: Mnemonic = Mnemonic::from_entropy(&[
         64, 139, 40, 92, 18, 56, 54, 0, 79, 75, 136, 66, 199, 196, 131, 114, 222, 19, 130, 69, 12,
         13, 67, 154, 243, 69, 186, 127, 196, 154, 207, 112,
@@ -52,14 +52,14 @@ fn main() {
             .unwrap();
 
     // Define the descriptor for the maker's wallet.
-    let maker_descriptor = Descriptor::Wpkh(Wpkh::new(maker_pubkey).unwrap());
+    let descriptor_str = format!("wpkh({}/84'/1'/0'/0/*)", maker_master_key);
     let maker_wallet_db_path = std::env::temp_dir().join("bdk-electrum-example-4");
     let maker_wallet_db =
         Store::<bdk::wallet::ChangeSet>::new_from_path(DB_MAGIC.as_bytes(), maker_wallet_db_path)
             .unwrap();
     // Create a wallet using the descriptor.
     let mut maker_wallet = Wallet::new(
-        &maker_descriptor.to_string(),
+        &descriptor_str,
         None,
         maker_wallet_db,
         Network::Testnet,
